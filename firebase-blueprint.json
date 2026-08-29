@@ -1,0 +1,88 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User account profile and preferences",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Verified Firebase Auth UID" },
+        "email": { "type": "string", "format": "email", "description": "User email address" },
+        "displayName": { "type": "string", "maxLength": 100, "description": "User display name" },
+        "photoURL": { "type": "string", "maxLength": 500, "description": "User avatar URL" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Profile creation timestamp" },
+        "lastActiveAt": { "type": "string", "format": "date-time", "description": "Last activity timestamp" }
+      },
+      "required": ["uid", "email", "createdAt"]
+    },
+    "Conversation": {
+      "title": "Conversation",
+      "description": "A private multi-turn journal or brainstorming conversation with Gemini",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$", "maxLength": 128 },
+        "userId": { "type": "string", "description": "Owner UID" },
+        "title": { "type": "string", "minLength": 1, "maxLength": 200, "description": "Conversation title" },
+        "mode": { "type": "string", "enum": ["free_journal", "brainstorm", "reflection", "planning"] },
+        "summary": { "type": "string", "maxLength": 1000, "description": "AI-generated short summary" },
+        "messageCount": { "type": "number", "description": "Total message count" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "title", "mode", "createdAt", "updatedAt"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A single user thought or Gemini response within a journal conversation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$", "maxLength": 128 },
+        "conversationId": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+        "userId": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "assistant"] },
+        "content": { "type": "string", "minLength": 1, "maxLength": 10000, "description": "Message text" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "conversationId", "userId", "role", "content", "createdAt"]
+    },
+    "Insight": {
+      "title": "Insight",
+      "description": "Structured Reflection Intelligence generated from a journal session",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$", "maxLength": 128 },
+        "userId": { "type": "string" },
+        "conversationId": { "type": "string", "pattern": "^[a-zA-Z0-9_-]+$" },
+        "conversationTitle": { "type": "string", "maxLength": 200 },
+        "mode": { "type": "string", "enum": ["free_journal", "brainstorm", "reflection", "planning"] },
+        "reflection": { "type": "string", "maxLength": 3000, "description": "Synthesized reflection" },
+        "keyThoughts": { "type": "string", "maxLength": 2000 },
+        "goals": { "type": "string", "maxLength": 2000 },
+        "decisions": { "type": "string", "maxLength": 2000 },
+        "actionItems": { "type": "string", "maxLength": 3000 },
+        "themes": { "type": "string", "maxLength": 1000 },
+        "emotionalTone": { "type": "string", "maxLength": 100 },
+        "questionsToRevisit": { "type": "string", "maxLength": 2000 },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["id", "userId", "conversationId", "reflection", "createdAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document isolated to verified UID"
+    },
+    "/users/{userId}/conversations/{conversationId}": {
+      "schema": "Conversation",
+      "description": "User-owned private journal conversations"
+    },
+    "/users/{userId}/conversations/{conversationId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Individual messages in a user conversation"
+    },
+    "/users/{userId}/insights/{insightId}": {
+      "schema": "Insight",
+      "description": "User-owned Reflection Intelligence insights"
+    }
+  }
+}
